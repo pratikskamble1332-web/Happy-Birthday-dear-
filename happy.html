@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QR Generator — Gauri Birthday</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,'Noto Sans',sans-serif;padding:18px;background:#fff9fb;color:#111}
+    .wrap{max-width:720px;margin:12px auto;padding:18px;border-radius:12px;border:1px solid #f0e6f2;background:#fff}
+    label{font-weight:700}
+    input[type=text]{width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;margin-top:6px;margin-bottom:12px}
+    button{padding:10px 14px;border-radius:10px;border:none;background:#ff6fb5;color:#fff;font-weight:800;cursor:pointer}
+    .row{display:flex;gap:8px;align-items:center}
+    canvas{display:block;margin:14px auto;border-radius:8px;background:#fff}
+    .hint{color:#6b7280;font-size:14px;margin-top:8px}
+    a.download{display:inline-block;margin-top:12px;padding:8px 12px;border-radius:8px;background:#7c3aed;color:#fff;text-decoration:none;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>QR Generator — शॉर्टकट</h2>
+    <label>तुमचा final URL (उदा. https://yourname.github.io/gauri-birthday.html)</label>
+    <input id="url" type="text" placeholder="इथे तुमचा link टाका" />
+    <div class="row">
+      <button id="gen">Generate QR</button>
+      <button id="clear" style="background:#6b7280">Clear</button>
+    </div>
+    <canvas id="qr" width="300" height="300" style="display:none"></canvas>
+    <div id="out" class="center"></div>
+    <p class="hint">Generate केल्यावर \"Download PNG\" दाबून image save करा आणि print/scan करा.</p>
+  </div>
+
+  <!-- Minimal QR encoder (no external lib) -->
+  <script>
+  // Simple QR generation using Google Chart API fallback (fast, no external libs)
+  // If user is offline, we render a data-URL using an SVG QR generator algorithm is complex;
+  // So we'll try to use Google Chart API image (this works in most cases).
+  const gen = document.getElementById('gen'), urlIn = document.getElementById('url'), out = document.getElementById('out'), qrCanvas = document.getElementById('qr'), clearBtn = document.getElementById('clear');
+
+  function showImage(src){
+    out.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = src;
+    img.width = 300; img.height = 300;
+    img.alt = 'QR Code';
+    img.style.borderRadius = '8px';
+    out.appendChild(img);
+    // create download link
+    const a = document.createElement('a');
+    a.href = src; a.download = 'gauri_qr.png'; a.textContent = 'Download PNG';
+    a.className = 'download';
+    out.appendChild(a);
+  }
+
+  gen.addEventListener('click', ()=>{
+    const v = (urlIn.value || '').trim();
+    if(!v){ alert('कृपया एक URL टाका'); return; }
+    // Use Google Chart QR API to get image quickly:
+    const encoded = encodeURIComponent(v);
+    const size = 500; // px
+    const api = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encoded}&choe=UTF-8&chld=L|1`;
+    showImage(api);
+  });
+
+  clearBtn.addEventListener('click', ()=>{ urlIn.value=''; out.innerHTML=''; qrCanvas.style.display='none'; });
+
+  </script>
+</body>
+</html>
